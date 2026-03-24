@@ -118,11 +118,19 @@ function loadQuestion() {
 }
 
 function checkAnswer(button, selected) {
-    if(selected === quizData[currentQuestion].answer){
+    const correctAnswer = quizData[currentQuestion].answer;
+
+    if(selected === correctAnswer){
         score++;
         button.classList.add('correct');
     } else {
         button.classList.add('wrong');
+        // highlight the correct answer
+        Array.from(optionsEl.children).forEach(b => {
+            if(b.textContent === correctAnswer){
+                b.classList.add('correct');
+            }
+        });
     }
 
     Array.from(optionsEl.children).forEach(b => b.disabled = true);
@@ -130,7 +138,7 @@ function checkAnswer(button, selected) {
     setTimeout(() => {
         currentQuestion++;
         loadQuestion();
-    }, 800);
+    }, 1000);
 }
 
 function showResult() {
