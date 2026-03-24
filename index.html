@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Quiz Website with Music & Rewards</title>
+<style>
+    @keyframes bgMove {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(-45deg, #74ebd5, #ACB6E5, #FFC3A0, #FFAFBD);
+        background-size: 400% 400%;
+        animation: bgMove 20s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .quiz-container {
+        background: rgba(255,255,255,0.95);
+        padding: 30px 50px;
+        border-radius: 15px;
+        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        max-width: 500px;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+    h1 { text-align: center; }
+    .question { font-size: 20px; margin-bottom: 20px; transition: transform 0.5s, opacity 0.5s; }
+    .slide-out { transform: translateX(-100%); opacity: 0; }
+    .slide-in { transform: translateX(0); opacity: 1; }
+    .options button {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: #3498db;
+        color: white;
+        transition: all 0.3s;
+    }
+    .options button:hover { background-color: #2980b9; }
+    .correct { background-color: #2ecc71 !important; }
+    .wrong { background-color: #e74c3c !important; }
+    .result { text-align: center; font-size: 20px; margin-top: 20px; }
+    .reward { text-align: center; font-size: 22px; margin-top: 10px; font-weight: bold; color: #e67e22; }
+    .restart-btn { background-color: #2ecc71; margin-top: 20px; padding: 12px 20px; font-size: 16px; }
+    .restart-btn:hover { background-color: #27ae60; }
+</style>
+</head>
+<body>
+
+<audio id="bg-music" src="https://www.bensound.com/bensound-music/bensound-happyrock.mp3" loop autoplay></audio>
+
+<div class="quiz-container">
+    <h1>Quiz Time!</h1>
+    <div id="quiz">
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="reward" id="reward"></div>
+    <button class="restart-btn" id="restart" style="display:none;">Restart Quiz</button>
+</div>
+
+<script>
+const quizData = [
+    {question: "Who is the most qundar person in the world?", options: ["taman", "agha", "raz", "hoshmand"], answer: "taman"},
+    {question: "Who is the best chir mzh on planet?", options: ["agha", "taman", "raz", "mcha barzani"], answer: "agha"},
+    {question: "Who is that guy who always fuck taman mustafa?", options: ["aziz", "agha", "ahmad", "raz"], answer: "aziz"},
+    {question: "Who is that guy who have the 7izest wife ever?", options: ["taman", "agha", "taman&agha", "7ama"], answer: "taman&agha"},
+    {question: "Who gonna fuck taman and agha every day?", options: ["ahmad", "aziz", "7ama", "all of them"], answer: "all of them"}
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+const questionEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const resultEl = document.getElementById('result');
+const rewardEl = document.getElementById('reward');
+const restartBtn = document.getElementById('restart');
+const quiz = document.getElementById('quiz');
+const music = document.getElementById('bg-music');
+
+function loadQuestion() {
+    if(currentQuestion < quizData.length) {
+        const q = quizData[currentQuestion];
+        questionEl.classList.add('slide-out');
+        optionsEl.classList.add('slide-out');
+
+        setTimeout(() => {
+            questionEl.textContent = q.question;
+            optionsEl.innerHTML = '';
+            q.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => checkAnswer(button, option);
+                optionsEl.appendChild(button);
+            });
+            questionEl.classList.remove('slide-out');
+            optionsEl.classList.remove('slide-out');
+            questionEl.classList.add('slide-in');
+            optionsEl.classList.add('slide-in');
+        }, 400);
+    } else {
+        showResult();
+    }
+}
+
+function checkAnswer(button, selected) {
+    if(selected === quizData[currentQuestion].answer){
+        score++;
+        button.classList.add('correct');
+    } else {
+        button.classList.add('wrong');
+    }
+
+    Array.from(optionsEl.children).forEach(b => b.disabled = true);
+
+    setTimeout(() => {
+        currentQuestion++;
+        loadQuestion();
+    }, 800);
+}
+
+function showResult() {
+    quiz.style.display = 'none';
+    let count = 0;
+    resultEl.textContent = `You scored 0 out of ${quizData.length}!`;
+    restartBtn.style.display = 'block';
+
+    const interval = setInterval(() => {
+        if(count < score){
+            count++;
+            resultEl.textContent = `You scored ${count} out of ${quizData.length}!`;
+        } else {
+            clearInterval(interval);
+            showReward();
+        }
+    }, 200);
+}
+
+function showReward() {
+    let message = "";
+    if(score === 1) message = "You are not a good taman&agha fucker";
+    else if(score === 2) message = "You are a little good taman&agha fucker";
+    else if(score === 3) message = "You are a good taman&agha fucker";
+    else if(score === 4) message = "Haaa brother? Why 4 correct? How many times you fucked taman&agha? Good job brother";
+    else if(score === 5) message = "OMG BEST taman&agha FUCKER EVERRRRR";
+    rewardEl.textContent = message;
+}
+
+restartBtn.onclick = () => {
+    currentQuestion = 0;
+    score = 0;
+    quiz.style.display = 'block';
+    resultEl.textContent = '';
+    rewardEl.textContent = '';
+    restartBtn.style.display = 'none';
+    loadQuestion();
+}
+
+window.onload = () => {
+    music.play().catch(() => {});
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
